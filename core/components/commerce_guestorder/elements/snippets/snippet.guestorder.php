@@ -1,4 +1,5 @@
 <?php
+
 header('Cache-Control: no cache');
 
 // Inputted order id.
@@ -12,6 +13,7 @@ $allowedFields = ["properties", "user", "fullname", "firstname", "lastname", "co
 
 // Defaults to commerce template twig order detail page.
 $tpl = (string)$modx->getOption('tpl', $scriptProperties, 'frontend/account/order-detail.twig');
+$formTpl = (string)$modx->getOption('formTpl', $scriptProperties, 'GetGuestOrderForm');
 $loadItems = (bool)$modx->getOption('loadItems', $scriptProperties, true);
 $loadStatus = (bool)$modx->getOption('loadStatus', $scriptProperties, true);
 $loadTransactions = (bool)$modx->getOption('loadTransactions', $scriptProperties, true);
@@ -54,8 +56,6 @@ if (isset($order) && is_numeric($order)) {
         'comOrder.test:=' => $commerce->isTestMode(),
         'comOrder.class_key:IN' => $allowedClasses
     ]);
-    $orderQuery->prepare();
-    print $orderQuery->toSQL();
     $order = $commerce->adapter->getObject('comOrder', $orderQuery);
     
     //print_r($order->toArray());
@@ -138,5 +138,10 @@ if (isset($order) && is_numeric($order)) {
     } else {
         $output = '<pre>' . print_r($data, true) . '</pre>';
     }
+    
     return $output;
+    
+} else {
+    // The form chunk to display when an order is not set
+    return $modx->getChunk($formTpl);
 }
