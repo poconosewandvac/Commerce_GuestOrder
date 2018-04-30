@@ -8,8 +8,10 @@ $secret = $modx->getOption("secret", $scriptProperties, $_REQUEST["secret"]);
 
 // Enable direct access with order ID and secret from comOrder
 $useSecret = (bool)$modx->getOption('useSecret', $scriptProperties, true);
-// comOrder fields to require
+// Comma seperated list of comOrder fields to validate against
 $fields = explode(",", $modx->getOption("fields", $scriptProperties, "zip"));
+// Address types to use. shipping, billing, or both (default)
+$addressType = $modx->getOption('addressType', $scriptProperties, "both");
 
 // Template settings
 $tpl = $modx->getOption('tpl', $scriptProperties, 'frontend/account/order-detail.twig');
@@ -45,18 +47,14 @@ if (isset($order) && is_numeric($order)) {
     $allowedClasses = array_unique($allowedClasses);
 
     // Build the order query, looking for only guest orders for inputted ID
-    $orderQuery = $commerce->adapter->newQuery('comOrder');
-    $orderQuery->select('comOrderAddress.address');
-    $orderQuery->select($modx->getSelectColumns('comOrder', 'comOrder'));
-    $orderQuery->innerJoin('comOrderAddress','comOrderAddress', ["comOrder.id = comOrderAddress.order"]);
+    $orderQuery = $modx->newQuery('comOrder');
     $orderQuery->where([
-        'comOrderAddress.order:=' => $order,
-        'comOrder.id:=' => $order,
-        'comOrder.user:=' => 0,
-        'comOrder.test:=' => $commerce->isTestMode(),
-        'comOrder.class_key:IN' => $allowedClasses
+        'id' => $order,
+        'user' => 0,
+        'test' => $commerce->isTestMode(),
+        'class_key:IN' => $allowedClasses
     ]);
-    $order = $commerce->adapter->getObject('comOrder', $orderQuery);
+    $order = $modx->getObject('comOrder', $orderQuery);
     
     // Check if the order actually exists.
     if (!$order) {
@@ -64,22 +62,37 @@ if (isset($order) && is_numeric($order)) {
     }
     
     if ($useSecret && isset($secret)) {
-        if($order->get('secret') !== $secret) {
+        if ($order->get('secret') !== $secret) {
             return $modx->getChunk($errorTpl, ['order' => $order]);
         }
     } else {
-        // TODO: Fix to actually search over each address. 
-        // Loop over each order address, getting the individual address (gets both billing & shipping). Checks each required field against comAddress object.
-        $addressQuery = $commerce->adapter->newQuery('comAddress');
-        $addressQuery->where([
-            'id' => $order->get('address')
+        $orderAddressQuery = $modx->newQuery('comOrderAddress');
+        $orderAddressQuery->where([
+            'order' => $order->get('id'),
         ]);
-        $address = $commerce->adapter->getObject('comAddress', $addressQuery);
-        
-        if($address) {
-            $addresses[] = $address->toArray();
-            
-            // Check each required field
+        if ($addressType !== "both") {
+            $orderAddressQuery->where([
+                'type' => $addressType    
+            ]);
+        }
+        $orderAddresses = $modx->getCollection("comOrderAddress", $orderAddressQuery);
+
+        if (!$orderAddresses) {
+            return $modx->getChunk($errorTpl, ['order' => $order]);
+        }
+
+        // Loop over each order address, getting the individual address. Checks each required field against comAddress object.
+        foreach ($orderAddresses as $orderAddress) {
+            $addressQuery = $modx->newQuery('comAddress');
+            $addressQuery->where([
+                'id' => $orderAddress->get('address')
+            ]);
+            $address = $modx->getObject('comAddress', $addressQuery);
+
+            if (!$address) {
+                return $modx->getChunk($errorTpl, ['order' => $order]);
+            }
+
             foreach ($fields as $field) {
                 if ($address->get($field) !== $values[$field]) {
                     return $modx->getChunk($errorTpl, ['order' => $order]);
