@@ -2,16 +2,14 @@
 
 header('Cache-Control: no cache');
 
-// Inputted order id.
+// Get form values
 $order = $modx->getOption("order", $scriptProperties, $_POST["order"]);
-// Array of inputted field values
 $values = $modx->getOption("values", $scriptProperties, $_POST["values"]);
 
-// Allowed fields in modx_commerce_address to use.  TODO add to system settings instead
+// comOrder fields to require
 $fields = explode(",", $modx->getOption("fields", $scriptProperties, "zip"));
-$allowedFields = ["properties", "user", "fullname", "firstname", "lastname", "company", "address1", "address2", "address3", "zip", "city", "state", "country", "phone", "mobile", "email"];
 
-// Defaults to commerce template twig order detail page.
+// Template settings
 $tpl = (string)$modx->getOption('tpl', $scriptProperties, 'frontend/account/order-detail.twig');
 $formTpl = (string)$modx->getOption('formTpl', $scriptProperties, 'GetGuestOrderForm');
 $loadItems = (bool)$modx->getOption('loadItems', $scriptProperties, true);
@@ -27,7 +25,7 @@ if (isset($order) && is_numeric($order)) {
     $commerce = $modx->getService('commerce', 'Commerce', $path, $params);
     
     if (!($commerce instanceof Commerce)) {
-        $modx->log(modX::LOG_LEVEL_ERROR, 'Could not load Commerce service in GuestOrder snippet.');
+        $modx->log(modX::LOG_LEVEL_ERROR, 'Could not load Commerce service in GetGuestOrder snippet.');
         return 'Could not load Commerce. Please try again later.';
     }
     
@@ -36,8 +34,7 @@ if (isset($order) && is_numeric($order)) {
     }
     $modx->lexicon->load('commerce:frontend');
 
-
-    // Check if class is processing or completed, don't want drafts. TODO add to system settings instead?
+    // Allowed order classes
     $allowedClasses = ['comProcessingOrder', 'comCompletedOrder'];
     foreach ($allowedClasses as $ac) {
         $allowedClasses = array_merge($allowedClasses, $modx->getDescendants($ac));
@@ -58,19 +55,19 @@ if (isset($order) && is_numeric($order)) {
     ]);
     $order = $commerce->adapter->getObject('comOrder', $orderQuery);
     
-    //print_r($order->toArray());
     // Check if the order actually exists. TODO custom not found tpl
     if (!$order) {
         return $modx->sendErrorPage();
     }
-
     
+    // TODO: Fix to actually search over each address. 
     // Loop over each order address, getting the individual address (gets both billing & shipping). Checks each required field against comAddress object.
     $addressQuery = $commerce->adapter->newQuery('comAddress');
     $addressQuery->where([
         'id' => $order->get('address')
     ]);
     $address = $commerce->adapter->getObject('comAddress', $addressQuery);
+    
     if($address) {
         $addresses[] = $address->toArray();
         
