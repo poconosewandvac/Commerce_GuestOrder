@@ -30,7 +30,7 @@ $modx->setLogTarget(XPDO_CLI_MODE ? 'ECHO' : 'HTML');
 
 /* set package info */
 define('PKG_NAME','Commerce_GuestOrder');
-define('PKG_VERSION','0.0.1');
+define('PKG_VERSION','0.1.1');
 define('PKG_RELEASE','dev');
 
 /* load builder */

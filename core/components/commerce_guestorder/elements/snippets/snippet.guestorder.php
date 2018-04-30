@@ -2,9 +2,12 @@
 header('Cache-Control: no cache');
 
 // Get form values
-$order = $modx->getOption("order", $scriptProperties, $_POST["order"]);
-$values = $modx->getOption("values", $scriptProperties, $_POST["values"]);
+$order = $modx->getOption("order", $scriptProperties, $_REQUEST["order"]);
+$values = $modx->getOption("values", $scriptProperties, $_REQUEST["values"]);
+$secret = $modx->getOption("secret", $scriptProperties, $_REQUEST["secret"]);
 
+// Enable direct access with order ID and secret from comOrder
+$useSecret = (bool)$modx->getOption('useSecret', $scriptProperties, true);
 // comOrder fields to require
 $fields = explode(",", $modx->getOption("fields", $scriptProperties, "zip"));
 
@@ -60,21 +63,27 @@ if (isset($order) && is_numeric($order)) {
         return $modx->getChunk($errorTpl, ['order' => $order]);
     }
     
-    // TODO: Fix to actually search over each address. 
-    // Loop over each order address, getting the individual address (gets both billing & shipping). Checks each required field against comAddress object.
-    $addressQuery = $commerce->adapter->newQuery('comAddress');
-    $addressQuery->where([
-        'id' => $order->get('address')
-    ]);
-    $address = $commerce->adapter->getObject('comAddress', $addressQuery);
-    
-    if($address) {
-        $addresses[] = $address->toArray();
+    if ($useSecret && isset($secret)) {
+        if($order->get('secret') !== $secret) {
+            return $modx->getChunk($errorTpl, ['order' => $order]);
+        }
+    } else {
+        // TODO: Fix to actually search over each address. 
+        // Loop over each order address, getting the individual address (gets both billing & shipping). Checks each required field against comAddress object.
+        $addressQuery = $commerce->adapter->newQuery('comAddress');
+        $addressQuery->where([
+            'id' => $order->get('address')
+        ]);
+        $address = $commerce->adapter->getObject('comAddress', $addressQuery);
         
-        // Check each required field
-        foreach ($fields as $field) {
-            if ($address->get($field) !== $values[$field]) {
-                return $modx->getChunk($errorTpl, ['order' => $order]);
+        if($address) {
+            $addresses[] = $address->toArray();
+            
+            // Check each required field
+            foreach ($fields as $field) {
+                if ($address->get($field) !== $values[$field]) {
+                    return $modx->getChunk($errorTpl, ['order' => $order]);
+                }
             }
         }
     }
