@@ -1,4 +1,7 @@
 <?php
+/**
+ * Commerce_GuestOrder
+ */
 
 $mtime = microtime();
 $mtime = explode(" ", $mtime);
@@ -36,8 +39,6 @@ $builder = new modPackageBuilder($modx);
 $builder->createPackage(PKG_NAME, PKG_VERSION, PKG_RELEASE);
 $builder->registerNamespace('commerce_guestorder',false,true,'{core_path}components/commerce_guestorder/');
 
-/* create snippet objects */
-
 /* create category */
 $category= $modx->newObject('modCategory');
 $category->set('id', 1);
@@ -53,6 +54,16 @@ else {
     $modx->log(modX::LOG_LEVEL_FATAL,'Adding snippets failed.'); 
 }
 
+/* add chunks */
+$modx->log(modX::LOG_LEVEL_INFO,'Adding in chunks.');
+$snippets = include $sources['data'].'transport.chunks.php';
+if (is_array($chunks)) {
+    $category->addMany($chunks);
+}
+else { 
+    $modx->log(modX::LOG_LEVEL_FATAL,'Adding chunks failed.'); 
+}
+
 /* create category vehicle */
 $attr = array(
     xPDOTransport::UNIQUE_KEY => 'category',
@@ -61,6 +72,11 @@ $attr = array(
     xPDOTransport::RELATED_OBJECTS => true,
     xPDOTransport::RELATED_OBJECT_ATTRIBUTES => array (
         'Snippets' => array(
+            xPDOTransport::PRESERVE_KEYS => false,
+            xPDOTransport::UPDATE_OBJECT => true,
+            xPDOTransport::UNIQUE_KEY => 'name',
+        ),
+        'Chunks' => array(
             xPDOTransport::PRESERVE_KEYS => false,
             xPDOTransport::UPDATE_OBJECT => true,
             xPDOTransport::UNIQUE_KEY => 'name',
