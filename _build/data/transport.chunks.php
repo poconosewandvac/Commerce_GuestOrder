@@ -14,4 +14,12 @@ $chunks[0]->fromArray(array(
     'snippet' => getChunkContent($sources['source_core'].'/elements/chunks/chunk.guestorderform.tpl'),
 ),'',true,true);
 
+$chunks[1] = $modx->newObject('modChunk');
+$chunks[1]->fromArray(array(
+    'id' => 0,
+    'name' => 'GetGuestOrderError',
+    'description' => 'Default error form for guest order verification.',
+    'snippet' => getChunkContent($sources['source_core'].'/elements/chunks/chunk.guestordererror.tpl'),
+),'',true,true);
+
 return $chunks;

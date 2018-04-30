@@ -1,5 +1,4 @@
 <?php
-
 header('Cache-Control: no cache');
 
 // Get form values
@@ -10,8 +9,9 @@ $values = $modx->getOption("values", $scriptProperties, $_POST["values"]);
 $fields = explode(",", $modx->getOption("fields", $scriptProperties, "zip"));
 
 // Template settings
-$tpl = (string)$modx->getOption('tpl', $scriptProperties, 'frontend/account/order-detail.twig');
-$formTpl = (string)$modx->getOption('formTpl', $scriptProperties, 'GetGuestOrderForm');
+$tpl = $modx->getOption('tpl', $scriptProperties, 'frontend/account/order-detail.twig');
+$formTpl = $modx->getOption('formTpl', $scriptProperties, 'GetGuestOrderForm');
+$errorTpl = $modx->getOption('errorTpl', $scriptProperties, 'GetGuestOrderError');
 $loadItems = (bool)$modx->getOption('loadItems', $scriptProperties, true);
 $loadStatus = (bool)$modx->getOption('loadStatus', $scriptProperties, true);
 $loadTransactions = (bool)$modx->getOption('loadTransactions', $scriptProperties, true);
@@ -55,9 +55,9 @@ if (isset($order) && is_numeric($order)) {
     ]);
     $order = $commerce->adapter->getObject('comOrder', $orderQuery);
     
-    // Check if the order actually exists. TODO custom not found tpl
+    // Check if the order actually exists.
     if (!$order) {
-        return $modx->sendErrorPage();
+        return $modx->getChunk($errorTpl, ['order' => $order]);
     }
     
     // TODO: Fix to actually search over each address. 
@@ -74,7 +74,7 @@ if (isset($order) && is_numeric($order)) {
         // Check each required field
         foreach ($fields as $field) {
             if ($address->get($field) !== $values[$field]) {
-                return $modx->sendErrorPage();
+                return $modx->getChunk($errorTpl, ['order' => $order]);
             }
         }
     }
