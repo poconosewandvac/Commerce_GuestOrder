@@ -1,3 +1,9 @@
 ++ GuestOrder for Commerce 0.10.8-pl
+
+++ Commerce_GuestOrder 1.0.0 pl
+++ Released on 5/1/2018
+- Code optimization (Thanks Mark)
+
+++ Commerce_GuestOrder 1.0.0 rc1
 ++ Released on 4/30/2018
 - Initial release candidate
