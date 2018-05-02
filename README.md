@@ -16,13 +16,13 @@ This will use the included chunks "GetGuestOrderForm" for the formTpl option and
 
 ### Validation Fields
 
-By default, the snippet validates against the zip field in comOrder, however it can validate any field in comOrder, or even multiple fields. For example, if you wanted to validate the zip and email field you would call GetGuestOrder like
+By default, the snippet validates against the zip field in comAddress, however it can validate against any column in comAddress or even multiple fields. For example, if you wanted to validate the zip and email field you would call GetGuestOrder with the fields property (where each field is comma seperated)
 
 ```
 [[!GetGuestOrder? &fields=`zip,email`]]
 ```
 
-This would also require a change to your formTpl to input the new field, which can be any chunk you create. You will need to add the fields using the name attribute name="values[column]". For example, a sample form for using zip and email could be
+This would also require a change to your formTpl to input the new field, which can be any chunk you create (formTpl). You will need to add the fields using the name attribute name="values[column]". For example, a sample form for using zip and email could be
 
 ```HTML
 <form action="[[~[[*id]]]]" method="POST">
@@ -39,7 +39,7 @@ Inside comOrder, there is a column, secret, that can be alternatively be used to
 
 ```HTML
 {% if order.user == 0 %}
-    <h1><a href="[[~RESOURCEID? &scheme=`full`]]?order={{ order.id|url_encode }}&secret={{ order.secret|url_encode }}">Track your order</a></h1>
+    <a href="[[~RESOURCEID? &scheme=`full`]]?order={{ order.id|url_encode }}&secret={{ order.secret|url_encode }}">Track your order</a>
 {% else %}
     <!-- Something could be put here for registered users to login to their account to track their order -->
 {% endif %}
@@ -55,6 +55,8 @@ This option defines which address to verify the fields against. It can be either
 
 Below are the template settings you can override.
 
-- tpl: template to use for order view
-- formTpl: template to use for the form
-- errorTpl: template to use when order could not be verified or found
+- tpl: template to use for order view (twig)
+- formTpl: template to use for the form (chunk)
+- errorTpl: template to use when order could not be verified or found (chunk)
+
+Since this extra is heavily based on the commerce.get\_order snippet included with commerce, you can also use the properties loadItems, loadStatus, loadTransactions, loadBillingAddress, and loadShippingAddress. All default to 1, set to 0 to disable. See more information about these properties on the modmore documentation https://docs.modmore.com/en/Commerce/v1/Snippets/get_order.html
