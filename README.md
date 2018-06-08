@@ -1,6 +1,6 @@
 # Commerce_GuestOrder
 
-Lets guest customer's easily view their previous orders. Uses the frontend/account/order-detai.twig file in your Commerce theme. Requires Modmore's Commerce to use https://www.modmore.com/commerce/
+Lets guest customer's easily view their previous orders. Uses the frontend/account/order-detail.twig file in your Commerce theme. Requires Modmore's Commerce to use https://www.modmore.com/commerce/
 
 ## Usage
 
