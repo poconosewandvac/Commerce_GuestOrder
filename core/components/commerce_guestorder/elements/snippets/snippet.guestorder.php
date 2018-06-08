@@ -30,6 +30,7 @@ $loadStatus = (bool)$modx->getOption('loadStatus', $scriptProperties, true);
 $loadTransactions = (bool)$modx->getOption('loadTransactions', $scriptProperties, true);
 $loadBillingAddress = (bool)$modx->getOption('loadBillingAddress', $scriptProperties, true);
 $loadShippingAddress = (bool)$modx->getOption('loadShippingAddress', $scriptProperties, true);
+$loadShipments = (bool)$modx->getOption('loadShipments', $scriptProperties, true);
 
 if ($order < 1) {
     // The form chunk to display when an order is not set
@@ -177,7 +178,17 @@ if ($loadShippingAddress) {
     $sa = $order->getShippingAddress();
     $data['shipping_address'] = $sa->toArray();
 }
+
+if ($loadShipments) {
+    $gs = $order->getShipments();
     
+    foreach ((array) $gs as $s) {
+        $shipments[] = $s->toArray();
+    }
+    
+    $data['shipments'] = $shipments;
+}
+
 if ($tpl !== '') {
     try {
         $output = $commerce->twig->render($tpl, $data);
