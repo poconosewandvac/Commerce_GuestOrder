@@ -51,6 +51,10 @@ If you do not want this feature, you can disable it using the snippet option use
 
 This option defines which address to verify the fields against. It can be either shipping, billing, or both (default).
 
+### Allow Registered Users (New in 1.1.0)
+
+Kind of defeats the "Guest" in the name of this module, but you can let registered users quickly view their orders without signing in by setting the allowRegistered snippet property to 1. It is disabled by default.
+
 ### Template
 
 Below are the template settings you can override.

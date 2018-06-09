@@ -16,6 +16,9 @@ $secret = $modx->getOption("secret", $scriptProperties, $_REQUEST["secret"]);
 
 // Enable direct access with order ID and secret from comOrder
 $useSecret = (bool)$modx->getOption('useSecret', $scriptProperties, true);
+// Let registered users check their order without signing in
+$allowRegistered = $modx->getOption('allowRegistered', $scriptProperties, false);
+
 // Comma seperated list of comOrder fields to validate against
 $fields = explode(",", $modx->getOption("fields", $scriptProperties, "zip"));
 // Address types to use. shipping, billing, or both (default)
@@ -67,10 +70,14 @@ $allowedClasses = array_unique($allowedClasses);
 $orderQuery = $modx->newQuery('comOrder');
 $orderQuery->where([
     'id' => $order,
-    'user' => 0,
     'test' => $commerce->isTestMode(),
     'class_key:IN' => $allowedClasses
 ]);
+if (!$allowRegistered) {
+    $orderQuery->where([
+        'user' => 0,
+    ]);
+}
 if ($useSecret && $secret) {
     $orderQuery->where([
          'secret' => $secret

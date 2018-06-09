@@ -3,6 +3,7 @@
 ++ Commerce_GuestOrder 1.1.0 pl
 ++ Released on 6/9/2018
 - Descriptive validation messages by default. Can be turned off off by using the generic validation lexicon in errorTpl.
+- Allow option to enable registered users. Disabled by default, enable by setting the allowRegistered snippet property to 1.
 - Ability to load shipments for use in the Twig template.
 - Lexicon usage in default chunks.
 
