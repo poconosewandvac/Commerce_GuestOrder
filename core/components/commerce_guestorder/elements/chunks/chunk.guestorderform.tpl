@@ -1,5 +1,5 @@
 <form action="[[~[[*id]]]]" method="POST">
-    <input type="text" placeholder="Order ID" name="order" />
-    <input type="text" placeholder="Zip Code" name="values[zip]" />
-    <button type="submit">Submit</button>
+    <input type="text" placeholder="[[%commerce.order_id]]" name="order" />
+    <input type="text" placeholder="[[%commerce.address.zip]]" name="values[zip]" />
+    <button type="submit">[[%commerce_guestorder.submit]]</button>
 </form>

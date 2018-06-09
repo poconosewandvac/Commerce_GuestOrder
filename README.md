@@ -1,6 +1,6 @@
 # Commerce_GuestOrder
 
-Lets guest customer's easily view their previous orders. Uses the frontend/account/order-detai.twig file in your Commerce theme. Requires Modmore's Commerce to use https://www.modmore.com/commerce/
+Lets guest customer's easily view their previous orders. Uses the frontend/account/order-detail.twig file in your Commerce theme. Requires Modmore's Commerce to use https://www.modmore.com/commerce/
 
 ## Usage
 
@@ -59,4 +59,4 @@ Below are the template settings you can override.
 - formTpl: template to use for the form (chunk)
 - errorTpl: template to use when order could not be verified or found (chunk)
 
-Since this extra is heavily based on the commerce.get\_order snippet included with commerce, you can also use the properties loadItems, loadStatus, loadTransactions, loadBillingAddress, and loadShippingAddress. All default to 1, set to 0 to disable. See more information about these properties on the modmore documentation https://docs.modmore.com/en/Commerce/v1/Snippets/get_order.html
+Since this extra is heavily based on the commerce.get\_order snippet included with commerce, you can also use the properties loadItems, loadStatus, loadTransactions, loadBillingAddress, loadShippingAddress, and loadShipments. All default to 1, set to 0 to disable. See more information about these properties on the modmore documentation https://docs.modmore.com/en/Commerce/v1/Snippets/get_order.html

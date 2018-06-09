@@ -1,4 +1,10 @@
-++ GuestOrder for Commerce 0.10.8-pl
+++ GuestOrder for Commerce 0.10.8-pl+
+
+++ Commerce_GuestOrder 1.1.0 pl
+++ Released on 6/9/2018
+- Descriptive validation messages by default. Can be turned off off by using the generic validation lexicon in errorTpl.
+- Ability to load shipments for use in the Twig template.
+- Lexicon usage in default chunks.
 
 ++ Commerce_GuestOrder 1.0.0 pl
 ++ Released on 5/1/2018

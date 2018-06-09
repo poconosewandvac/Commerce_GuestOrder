@@ -22,9 +22,13 @@ $fields = explode(",", $modx->getOption("fields", $scriptProperties, "zip"));
 $addressType = $modx->getOption('addressType', $scriptProperties, "both");
 
 // Template settings
+// Twig
 $tpl = $modx->getOption('tpl', $scriptProperties, 'frontend/account/order-detail.twig');
+// Chunks
 $formTpl = $modx->getOption('formTpl', $scriptProperties, 'GetGuestOrderForm');
 $errorTpl = $modx->getOption('errorTpl', $scriptProperties, 'GetGuestOrderError');
+
+// Loading
 $loadItems = (bool)$modx->getOption('loadItems', $scriptProperties, true);
 $loadStatus = (bool)$modx->getOption('loadStatus', $scriptProperties, true);
 $loadTransactions = (bool)$modx->getOption('loadTransactions', $scriptProperties, true);
@@ -50,7 +54,7 @@ if (!($commerce instanceof Commerce)) {
 if ($commerce->isDisabled()) {
     return $commerce->adapter->lexicon('commerce.mode.disabled.message');
 }
-$modx->lexicon->load('commerce:frontend');
+$modx->lexicon->load('commerce:frontend', 'commerce:default', 'commerce_guestorder:default');
 
 // Allowed order classes to use in the orderQuery
 $allowedClasses = ['comProcessingOrder', 'comCompletedOrder'];
@@ -76,7 +80,7 @@ $order = $modx->getObject('comOrder', $orderQuery);
     
 // Check if the order actually exists.
 if (!$order) {
-    return $modx->getChunk($errorTpl, ['order' => $order]);
+    return $modx->getChunk($errorTpl, ['order' => $order, 'error' => $modx->lexicon('commerce_guestorder.error_order_dne')]);
 }
 
 // Address validation if the secret is not being used.
@@ -93,7 +97,7 @@ if (!$secret) {
     $orderAddresses = $modx->getCollection("comOrderAddress", $orderAddressQuery);
 
     if (!$orderAddresses) {
-        return $modx->getChunk($errorTpl, ['order' => $order]);
+        return $modx->getChunk($errorTpl, ['order' => $order, 'error' => $modx->lexicon('commerce_guestorder.error_order_no_addr')]);
     }
 
     switch ($addressType) {
@@ -102,7 +106,7 @@ if (!$secret) {
             
             foreach ($fields as $field) {
                 if ($address->get($field) !== $values[$field]) {
-                    return $modx->getChunk($errorTpl, ['order' => $order]);
+                    return $modx->getChunk($errorTpl, ['order' => $order, 'error' => $modx->lexicon('commerce_guestorder.error_ship_addr')]);
                 }
             }
             
@@ -112,7 +116,7 @@ if (!$secret) {
             
             foreach ($fields as $field) {
                 if ($address->get($field) !== $values[$field]) {
-                    return $modx->getChunk($errorTpl, ['order' => $order]);
+                    return $modx->getChunk($errorTpl, ['order' => $order, 'error' => $modx->lexicon('commerce_guestorder.error_bill_addr')]);
                 }
             }
             
@@ -130,7 +134,7 @@ if (!$secret) {
             break;
         default:
             // In case addressType is not set to shipping, billing, or both
-            return $modx->getChunk($errorTpl, ['order' => $order]);
+            return $modx->getChunk($errorTpl, ['order' => $order, 'error' => $modx->lexicon('commerce_guestorder.error_type_addr')]);
     };
 }
     
