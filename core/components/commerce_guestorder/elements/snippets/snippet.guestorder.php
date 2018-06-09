@@ -39,6 +39,9 @@ $loadBillingAddress = (bool)$modx->getOption('loadBillingAddress', $scriptProper
 $loadShippingAddress = (bool)$modx->getOption('loadShippingAddress', $scriptProperties, true);
 $loadShipments = (bool)$modx->getOption('loadShipments', $scriptProperties, true);
 
+// Lexicons to load
+$modx->lexicon->load('commerce:frontend', 'commerce:default', 'commerce_guestorder:default');
+
 if ($order < 1) {
     // The form chunk to display when an order is not set
     return $modx->getChunk($formTpl);
@@ -57,7 +60,6 @@ if (!($commerce instanceof Commerce)) {
 if ($commerce->isDisabled()) {
     return $commerce->adapter->lexicon('commerce.mode.disabled.message');
 }
-$modx->lexicon->load('commerce:frontend', 'commerce:default', 'commerce_guestorder:default');
 
 // Allowed order classes to use in the orderQuery
 $allowedClasses = ['comProcessingOrder', 'comCompletedOrder'];
