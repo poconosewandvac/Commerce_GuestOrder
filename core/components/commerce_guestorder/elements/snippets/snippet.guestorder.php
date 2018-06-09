@@ -136,7 +136,7 @@ if (!$secret) {
 
             foreach ($fields as $field) {
                 if (!(($shippingAddress->get($field) === $values[$field]) || ($billingAddress->get($field) === $values[$field]))) {
-                    return $modx->getChunk($errorTpl, ['order' => $order]);
+                    return $modx->getChunk($errorTpl, ['order' => $order, 'error' => $modx->lexicon('commerce_guestorder.error_both_addr')]);
                 }
             }
             
