@@ -10,17 +10,19 @@
 header('Cache-Control: no cache');
 
 // Get form values
-$order = (int)$modx->getOption("order", $scriptProperties, $_REQUEST["order"]);
-$values = $modx->getOption("values", $scriptProperties, $_REQUEST["values"]);
-$secret = $modx->getOption("secret", $scriptProperties, $_REQUEST["secret"]);
+$orderId = (int) $modx->getOption('order', $_REQUEST, 0);
+$values = $modx->getOption('values', $_REQUEST, []);
+$secret = $modx->getOption('secret', $_REQUEST, '');
 
 // Enable direct access with order ID and secret from comOrder
-$useSecret = (bool)$modx->getOption('useSecret', $scriptProperties, true);
+$useSecret = (bool) $modx->getOption('useSecret', $scriptProperties, true);
 // Let registered users check their order without signing in
 $allowRegistered = $modx->getOption('allowRegistered', $scriptProperties, false);
+// Fall back to check id column (for legacy installs pre-ref)
+$useIdFallback = (bool) $modx->getOption('useIdFallback', $scriptProperties, true);
 
 // Comma seperated list of comOrder fields to validate against
-$fields = explode(",", $modx->getOption("fields", $scriptProperties, "zip"));
+$fields = array_map('trim', explode(",", $modx->getOption("fields", $scriptProperties, "zip")));
 // Address types to use. shipping, billing, or both (default)
 $addressType = $modx->getOption('addressType', $scriptProperties, "both");
 
@@ -42,7 +44,7 @@ $loadShipments = (bool)$modx->getOption('loadShipments', $scriptProperties, true
 // Lexicons to load
 $modx->lexicon->load('commerce:frontend', 'commerce:default', 'commerce_guestorder:default');
 
-if ($order < 1) {
+if ($orderId <= 0) {
     // The form chunk to display when an order is not set
     return $modx->getChunk($formTpl);
 }
@@ -62,32 +64,39 @@ if ($commerce->isDisabled()) {
 }
 
 // Allowed order classes to use in the orderQuery
-$allowedClasses = ['comProcessingOrder', 'comCompletedOrder'];
+$allowedClasses = ['comProcessingOrder', 'comCompletedOrder', 'comCancelledOrder'];
 foreach ($allowedClasses as $ac) {
     $allowedClasses = array_merge($allowedClasses, $modx->getDescendants($ac));
 }
 $allowedClasses = array_unique($allowedClasses);
 
-// Build the order query, looking for only guest orders for inputted ID
-$orderQuery = $modx->newQuery('comOrder');
-$orderQuery->where([
-    'id' => $order,
+// Build the order query
+$queryFields = [
     'test' => $commerce->isTestMode(),
-    'class_key:IN' => $allowedClasses
-]);
+    'class_key:IN' => $allowedClasses,
+];
+
 if (!$allowRegistered) {
-    $orderQuery->where([
-        'user' => 0,
-    ]);
+    $queryFields['user'] = 0;
 }
+
 if ($useSecret && $secret) {
-    $orderQuery->where([
-         'secret' => $secret
-    ]);
+    $queryFields['secret'] = $secret;
 }
-$order = $modx->getObject('comOrder', $orderQuery);
+
+// Check for order by reference first
+$orderRefQuery = $modx->newQuery('comOrder');
+$orderRefQuery->where(array_merge($queryFields, ['reference_incr' => $orderId]));
+$order = $modx->getObject('comOrder', $orderRefQuery);
+
+// Attempt to fetch order by ID (legacy) if it cannot be found by reference
+if (!$order && $useIdFallback) {
+    $orderIdQuery = $modx->newQuery('comOrder');
+    $orderIdQuery->where(array_merge($queryFields, ['id' => $orderId]));
+    $order = $modx->getObject('comOrder', $orderIdQuery);
+}
     
-// Check if the order actually exists.
+// Check if the order exists.
 if (!$order) {
     return $modx->getChunk($errorTpl, ['order' => $order, 'error' => $modx->lexicon('commerce_guestorder.error_order_dne')]);
 }

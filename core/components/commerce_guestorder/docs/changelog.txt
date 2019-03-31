@@ -1,4 +1,10 @@
-++ GuestOrder for Commerce 0.10.8-pl+
+++ GuestOrder for Commerce
+
+++ Commerce_GuestOrder 1.1.1 pl
+++ Released on 3/30/2019
+- Enable use of reference_incr field in Commerce 0.12+ to get order
+- Add fallback (enabled by default) to get order by id
+- Allow field names to be entered with spaces after commas
 
 ++ Commerce_GuestOrder 1.1.0 pl
 ++ Released on 6/9/2018
